@@ -8,15 +8,15 @@ import (
 	"os"
 )
 
-type S3CompatibleInterface interface {
+type s3Interface interface {
 	PutObject(*s3.PutObjectInput) (*s3.PutObjectOutput, error)
 }
 
 type client struct {
-	Service S3CompatibleInterface
+	Service s3Interface
 }
 
-func New(service S3CompatibleInterface) client {
+func New(service s3Interface) client {
 	return client{
 		Service: service,
 	}
