@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/matthew-andrews/s3up/objects"
 	"github.com/urfave/cli"
 	"os"
@@ -26,10 +28,6 @@ func main() {
 			Usage: "Specify the S3 bucket to upload files to",
 		},
 		cli.StringFlag{
-			Name:  "region",
-			Usage: "Optionally set the region (defaults to whatever set by the environment)",
-		},
-		cli.StringFlag{
 			Name:  "cache-control",
 			Usage: "Optionally set a Cache-Control value",
 		},
@@ -40,12 +38,32 @@ func main() {
 		},
 	}
 	app.Action = func(c *cli.Context) error {
+		svc := s3.New(session.New())
 		files, _ := objects.GetFiles(c.Args(), c.Int("strip"), c.String("destination"), c.String("cache-control"), c.String("acl"))
+		bucket := c.String("bucket")
 		if len(files) < 1 {
 			return cli.NewExitError("No files found for upload to S3.  (Directories are ignored)", 1)
 		}
 		for _, file := range files {
 			fmt.Printf("%s to %s\n", file.Location, file.Key)
+			realFile, err := os.Open(file.Location)
+			if err != nil {
+				cli.NewExitError(fmt.Sprintf("Could not open file: %s", file.Location), 3)
+			}
+			defer realFile.Close()
+			resp, err := svc.PutObject(&s3.PutObjectInput{
+				Body:         realFile,
+				Bucket:       &bucket,
+				Key:          &file.Key,
+				ContentType:  &file.ContentType,
+				CacheControl: &file.CacheControl,
+				ACL:          &file.ACL,
+			})
+			if err != nil {
+				fmt.Println(err)
+				cli.NewExitError("Failed to upload file to S3", 2)
+			}
+			fmt.Println(resp)
 		}
 		return nil
 	}
