@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/matthew-andrews/s3up/objects"
 	"github.com/urfave/cli"
 	"os"
 )
@@ -34,11 +35,18 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "acl",
+			Value: "public-read",
 			Usage: "Optionally set the Canned Access Control List for new files being put into S3 (default to public-read)",
 		},
 	}
 	app.Action = func(c *cli.Context) error {
-		fmt.Println("will upload some files, I guess")
+		files, _ := objects.GetFiles(c.Args(), c.Int("strip"), c.String("destination"), c.String("cache-control"), c.String("acl"))
+		if len(files) < 1 {
+			return cli.NewExitError("No files found for upload to S3.  (Directories are ignored)", 1)
+		}
+		for _, file := range files {
+			fmt.Printf("%s to %s\n", file.Location, file.Key)
+		}
 		return nil
 	}
 	app.Run(os.Args)
