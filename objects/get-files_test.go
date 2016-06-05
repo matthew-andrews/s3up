@@ -1,8 +1,7 @@
 package objects
 
 import (
-	"errors"
-	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -16,7 +15,7 @@ func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}
 
-	if err = fileSlicesAreEquivalent(files, []File{
+	if !reflect.DeepEqual(files, []File{
 		File{
 			ACL:          "public-read",
 			CacheControl: "",
@@ -25,8 +24,8 @@ func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
 			Key:          "prefix/my-file.txt",
 			Location:     "../fixtures/one-file/my-file.txt",
 		},
-	}); err != nil {
-		t.Fatalf("Unexpected error, %v\n", err)
+	}) {
+		t.Fatalf("%s did not match expected value", files)
 	}
 }
 
@@ -39,7 +38,7 @@ func TestGetFilesWithAFolderWithSubfolders(t *testing.T) {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}
 
-	if err = fileSlicesAreEquivalent(files, []File{
+	if !reflect.DeepEqual(files, []File{
 		File{
 			ACL:          "public-read",
 			CacheControl: "",
@@ -56,22 +55,8 @@ func TestGetFilesWithAFolderWithSubfolders(t *testing.T) {
 			Key:          "top-file.txt",
 			Location:     "../fixtures/subfolders/top-file.txt",
 		},
-	}); err != nil {
-		t.Fatalf("Unexpected error, %v\n", err)
+	}) {
+		t.Fatalf("%s did not match expected value", files)
 	}
 
-}
-
-func fileSlicesAreEquivalent(expected []File, actual []File) error {
-	if len(expected) != len(actual) {
-		return errors.New(fmt.Sprintf("returned slice should be length %d", len(expected)))
-	}
-
-	for i, _ := range expected {
-		if expected[i] != actual[i] {
-			return errors.New(fmt.Sprintf("item at index %d should match %s but was %s", i, expected[i], actual[i]))
-		}
-	}
-
-	return nil
 }
