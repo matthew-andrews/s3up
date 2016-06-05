@@ -7,7 +7,11 @@ import (
 )
 
 func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
-	files, err := GetFiles([]string{"../fixtures/one-file/my-file.txt"}, 3, "prefix", "", "public-read")
+	files, err := GetFiles([]string{
+		"../fixtures/one-file/my-file.txt",
+		// This should be skipped
+		"../fixtures/one-file",
+	}, 3, "prefix", "", "public-read")
 	if err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}

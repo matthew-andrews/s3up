@@ -6,3 +6,6 @@ test:
 
 simple:
 	go run main.go --strip 1 `find . -path "./fixtures/*"`
+
+empty:
+	go run main.go

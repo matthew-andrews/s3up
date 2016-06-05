@@ -2,6 +2,7 @@ package objects
 
 import (
 	"mime"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -19,14 +20,20 @@ func GetFiles(files []string, strip int, destination string, cacheControl string
 	var output []File
 	for _, file := range files {
 		name := filepath.Clean(file)
-		output = append(output, File{
-			ACL:          acl,
-			CacheControl: cacheControl,
-			ContentType:  mime.TypeByExtension(filepath.Ext(name)),
-			Etag:         "TODO",
-			Key:          filepath.Join(destination, StripFromName(name, strip)),
-			Location:     name,
-		})
+		fileInfo, err := os.Stat(name)
+		if err != nil {
+			return output, err
+		}
+		if !fileInfo.IsDir() {
+			output = append(output, File{
+				ACL:          acl,
+				CacheControl: cacheControl,
+				ContentType:  mime.TypeByExtension(filepath.Ext(name)),
+				Etag:         "TODO",
+				Key:          filepath.Join(destination, StripFromName(name, strip)),
+				Location:     name,
+			})
+		}
 	}
 	return output, nil
 }
