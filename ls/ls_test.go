@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestGetAll(t *testing.T) {
+func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
 	files, err := GetFiles("../fixtures/one-file")
 	if err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
@@ -14,13 +14,36 @@ func TestGetAll(t *testing.T) {
 
 	if err = fileSlicesAreEquivalent(files, []File{
 		File{
-			Filename:    "my-file.txt",
+			Filename:    "../fixtures/one-file/my-file.txt",
 			ContentType: "text/plain; charset=utf-8",
 			Etag:        "TODO",
 		},
 	}); err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}
+}
+
+func TestGetFilesWithAFolderWithSubfolders(t *testing.T) {
+	files, err := GetFiles("../fixtures/subfolders")
+	if err != nil {
+		t.Fatalf("Unexpected error, %v\n", err)
+	}
+
+	if err = fileSlicesAreEquivalent(files, []File{
+		File{
+			Filename:    "../fixtures/subfolders/subsubfolder/bottom-file.txt",
+			ContentType: "text/plain; charset=utf-8",
+			Etag:        "TODO",
+		},
+		File{
+			Filename:    "../fixtures/subfolders/top-file.txt",
+			ContentType: "text/plain; charset=utf-8",
+			Etag:        "TODO",
+		},
+	}); err != nil {
+		t.Fatalf("Unexpected error, %v\n", err)
+	}
+
 }
 
 func fileSlicesAreEquivalent(expected []File, actual []File) error {

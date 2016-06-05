@@ -3,6 +3,7 @@ package ls
 import (
 	"io/ioutil"
 	"mime"
+	"path"
 	"path/filepath"
 )
 
@@ -19,12 +20,18 @@ func GetFiles(directory string) ([]File, error) {
 		return output, err
 	}
 	for _, file := range files {
-		if !file.IsDir() {
-			filename := file.Name()
+		name := path.Join(directory, file.Name())
+		if file.IsDir() {
+			subFiles, err := GetFiles(name)
+			if err != nil {
+				return output, err
+			}
+			output = append(output, subFiles...)
+		} else {
 			output = append(output, File{
-				Filename:    filename,
+				Filename:    name,
 				Etag:        "TODO",
-				ContentType: mime.TypeByExtension(filepath.Ext(filename)),
+				ContentType: mime.TypeByExtension(filepath.Ext(name)),
 			})
 		}
 	}
