@@ -3,7 +3,6 @@ package ls
 import (
 	"io/ioutil"
 	"mime"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -15,7 +14,7 @@ type File struct {
 	ContentType string
 }
 
-func GetFiles(directory string, strip int) ([]File, error) {
+func GetFiles(directory string, strip int, destination string) ([]File, error) {
 	directory = filepath.Clean(directory)
 	var output []File
 	files, err := ioutil.ReadDir(directory)
@@ -23,16 +22,16 @@ func GetFiles(directory string, strip int) ([]File, error) {
 		return output, err
 	}
 	for _, file := range files {
-		name := path.Join(directory, file.Name())
+		name := filepath.Join(directory, file.Name())
 		if file.IsDir() {
-			subFiles, err := GetFiles(name, strip)
+			subFiles, err := GetFiles(name, strip, destination)
 			if err != nil {
 				return output, err
 			}
 			output = append(output, subFiles...)
 		} else {
 			output = append(output, File{
-				Key:         StripFromName(name, strip),
+				Key:         filepath.Join(destination, StripFromName(name, strip)),
 				Location:    name,
 				Etag:        "TODO",
 				ContentType: mime.TypeByExtension(filepath.Ext(name)),

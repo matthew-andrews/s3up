@@ -7,14 +7,14 @@ import (
 )
 
 func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
-	files, err := GetFiles("../fixtures/one-file", 3)
+	files, err := GetFiles("../fixtures/one-file", 3, "prefix")
 	if err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}
 
 	if err = fileSlicesAreEquivalent(files, []File{
 		File{
-			Key:         "my-file.txt",
+			Key:         "prefix/my-file.txt",
 			Location:    "../fixtures/one-file/my-file.txt",
 			ContentType: "text/plain; charset=utf-8",
 			Etag:        "TODO",
@@ -25,7 +25,7 @@ func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
 }
 
 func TestGetFilesWithAFolderWithSubfolders(t *testing.T) {
-	files, err := GetFiles("../fixtures/subfolders", 3)
+	files, err := GetFiles("../fixtures/subfolders", 3, "")
 	if err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}
