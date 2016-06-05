@@ -40,9 +40,7 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) error {
 		files, _ := objects.GetFiles(c.Args(), c.Int("strip"), c.String("destination"), c.String("cache-control"), c.String("acl"))
-		service := s3client.Client{
-			Service: s3.New(session.New()),
-		}
+		service := s3client.New(s3.New(session.New()))
 		err := service.Upload(c.String("bucket"), files)
 		if err != nil {
 			return cli.NewExitError(fmt.Sprintf("%s", err), 1)

@@ -8,11 +8,21 @@ import (
 	"os"
 )
 
-type Client struct {
-	Service *s3.S3
+type S3CompatibleInterface interface {
+	PutObject(*s3.PutObjectInput) (*s3.PutObjectOutput, error)
 }
 
-func (client *Client) Upload(bucket string, files []objects.File) error {
+type client struct {
+	Service S3CompatibleInterface
+}
+
+func New(service S3CompatibleInterface) client {
+	return client{
+		Service: service,
+	}
+}
+
+func (client *client) Upload(bucket string, files []objects.File) error {
 	if len(files) < 1 {
 		return errors.New("No files found for upload to S3.  (Directories are ignored)")
 	}
