@@ -21,6 +21,10 @@ func main() {
 			Usage: "Optionally add a prefix to the upload path",
 		},
 		cli.StringFlag{
+			Name:  "bucket",
+			Usage: "Specify the S3 bucket to upload files to",
+		},
+		cli.StringFlag{
 			Name:  "region",
 			Usage: "Optionally set the region (defaults to whatever set by the environment)",
 		},
