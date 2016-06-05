@@ -30,7 +30,7 @@ func (client client) Upload(bucket string, files []objects.File) error {
 	}
 
 	for _, file := range files {
-		if err := client.upload(bucket, file); err != nil {
+		if err := client.uploadFile(bucket, file); err != nil {
 			return err
 		}
 	}
@@ -38,7 +38,7 @@ func (client client) Upload(bucket string, files []objects.File) error {
 	return nil
 }
 
-func (client client) upload(bucket string, file objects.File) error {
+func (client client) uploadFile(bucket string, file objects.File) error {
 	// HeadObject
 	headResp, err := client.Service.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(bucket),
