@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
-	files, err := GetFiles("../fixtures/one-file", 3, "prefix", "", "public-read")
+	files, err := GetFiles([]string{"../fixtures/one-file/my-file.txt"}, 3, "prefix", "", "public-read")
 	if err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}
@@ -27,7 +27,10 @@ func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
 }
 
 func TestGetFilesWithAFolderWithSubfolders(t *testing.T) {
-	files, err := GetFiles("../fixtures/subfolders", 3, "", "", "public-read")
+	files, err := GetFiles([]string{
+		"../fixtures/subfolders/subsubfolder/bottom-file.txt",
+		"../fixtures/subfolders/top-file.txt",
+	}, 3, "", "", "public-read")
 	if err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}

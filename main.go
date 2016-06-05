@@ -34,11 +34,14 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "acl",
+			Value: "public-read",
 			Usage: "Optionally set the Canned Access Control List for new files being put into S3 (default to public-read)",
 		},
 	}
 	app.Action = func(c *cli.Context) error {
 		fmt.Println("will upload some files, I guess")
+		fmt.Println(c.Args())
+		fmt.Println(c.String("acl"))
 		return nil
 	}
 	app.Run(os.Args)
