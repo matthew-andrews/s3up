@@ -10,7 +10,7 @@ import (
 type File struct {
 	Location     string
 	Key          string
-	Etag         string
+	ETag         string
 	ACL          string
 	CacheControl string
 	ContentType  string
@@ -26,8 +26,8 @@ func GetFiles(files []string, strip int, destination string, cacheControl string
 		}
 
 		if !fileInfo.IsDir() {
-			// Calculate Etag
-			fileEtag, err := etag.Compute(name)
+			// Calculate ETag
+			fileETag, err := etag.Compute(name)
 			if err != nil {
 				return output, err
 			}
@@ -36,7 +36,7 @@ func GetFiles(files []string, strip int, destination string, cacheControl string
 				ACL:          acl,
 				CacheControl: cacheControl,
 				ContentType:  mime.TypeByExtension(filepath.Ext(name)),
-				Etag:         fileEtag,
+				ETag:         fileETag,
 				Key:          filepath.Join(destination, StripFromName(name, strip)),
 				Location:     name,
 			})
