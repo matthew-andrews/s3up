@@ -22,15 +22,11 @@ func (stub stubS3Service) PutObject(input *s3.PutObjectInput) (*s3.PutObjectOutp
 func (stub stubS3Service) HeadObject(input *s3.HeadObjectInput) (*s3.HeadObjectOutput, error) {
 	lastHeadObjectInput = input
 
-	cacheControl := "public, max-age=31536000"
-	contentType := "text/plain; charset=utf-8"
-	etag := "\"f0ef7081e1539ac00ef5b761b4fb01b3\""
-
 	if aws.StringValue(input.Key) == "my-file.txt" {
 		return &s3.HeadObjectOutput{
-			CacheControl: &cacheControl,
-			ContentType:  &contentType,
-			ETag:         &etag,
+			CacheControl: aws.String("public, max-age=31536000"),
+			ContentType:  aws.String("text/plain; charset=utf-8"),
+			ETag:         aws.String("\"f0ef7081e1539ac00ef5b761b4fb01b3\""),
 		}, nil
 	}
 
