@@ -1,31 +1,27 @@
 package s3client
 
 import (
-	"errors"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/matthew-andrews/s3up/objects"
 	"testing"
 )
 
-type stubS3Service struct {
-	UsedBucket string
-}
+type stubS3Service struct{}
+
+var lastPutObjectInput *s3.PutObjectInput
 
 func (stub stubS3Service) PutObject(input *s3.PutObjectInput) (*s3.PutObjectOutput, error) {
-	var output *s3.PutObjectOutput
+	lastPutObjectInput = input
+	var putObjectOutput *s3.PutObjectOutput
+	return putObjectOutput, nil
+}
 
-	if *input.Bucket != "my-fake-bucket" {
-		return output, errors.New("Attempted to upload to the wrong bucket: " + *input.Bucket)
-	}
-
-	if *input.Key != "my-file.txt" {
-		return output, errors.New("Attempted to upload to the wrong key: " + *input.Key)
-	}
-
-	return output, nil
+func reset() {
+	lastPutObjectInput = nil
 }
 
 func TestS3ClientUpload(t *testing.T) {
+	reset()
 	stub := stubS3Service{}
 	service := New(stub)
 	err := service.Upload("my-fake-bucket", []objects.File{
@@ -40,5 +36,13 @@ func TestS3ClientUpload(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	if *lastPutObjectInput.Bucket != "my-fake-bucket" {
+		t.Fatalf("Attempted to upload to the wrong bucket: %s", *lastPutObjectInput.Bucket)
+	}
+
+	if *lastPutObjectInput.Key != "my-file.txt" {
+		t.Fatalf("Attempted to upload to the wrong key: %s", *lastPutObjectInput.Key)
 	}
 }
