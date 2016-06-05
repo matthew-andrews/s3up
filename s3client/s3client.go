@@ -3,6 +3,7 @@ package s3client
 import (
 	"errors"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/matthew-andrews/s3up/objects"
 	"os"
@@ -10,6 +11,7 @@ import (
 
 type s3Interface interface {
 	PutObject(*s3.PutObjectInput) (*s3.PutObjectOutput, error)
+	HeadObject(*s3.HeadObjectInput) (*s3.HeadObjectOutput, error)
 }
 
 type client struct {
@@ -29,23 +31,39 @@ func (client *client) Upload(bucket string, files []objects.File) error {
 
 	for _, file := range files {
 		fmt.Printf("%s to %s\n", file.Location, file.Key)
-		realFile, err := os.Open(file.Location)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Could not open file: %s", file.Location))
-		}
-		defer realFile.Close()
-		resp, err := client.Service.PutObject(&s3.PutObjectInput{
-			Body:         realFile,
-			Bucket:       &bucket,
-			Key:          &file.Key,
-			ContentType:  &file.ContentType,
-			CacheControl: &file.CacheControl,
-			ACL:          &file.ACL,
+
+		// HeadObject
+		headResp, err := client.Service.HeadObject(&s3.HeadObjectInput{
+			Bucket: &bucket,
+			Key:    &file.Key,
 		})
+
 		if err != nil {
-			return errors.New(fmt.Sprintf("Failed to upload file to S3: %s", err.Error()))
+			return errors.New(fmt.Sprintf("Head request to S3 object failed: %s", err))
 		}
-		fmt.Println(resp)
+
+		if aws.StringValue(headResp.ETag) == "\""+file.ETag+"\"" {
+			fmt.Printf("Unchanged, skipping: %s\n", file.Key)
+		} else {
+			// PutObject
+			realFile, err := os.Open(file.Location)
+			if err != nil {
+				return errors.New(fmt.Sprintf("Could not open file: %s", file.Location))
+			}
+			defer realFile.Close()
+			_, err = client.Service.PutObject(&s3.PutObjectInput{
+				Body:         realFile,
+				Bucket:       &bucket,
+				Key:          &file.Key,
+				ContentType:  &file.ContentType,
+				CacheControl: &file.CacheControl,
+				ACL:          &file.ACL,
+			})
+			if err != nil {
+				return errors.New(fmt.Sprintf("Failed to upload file to S3: %s", err.Error()))
+			}
+			fmt.Printf("Successfully uploaded: %s", file.Key)
+		}
 	}
 
 	return nil
