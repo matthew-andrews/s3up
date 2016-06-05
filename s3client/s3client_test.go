@@ -6,25 +6,25 @@ import (
 	"testing"
 )
 
-type stubS3Service struct{}
+// Stubbing
 
 var lastPutObjectInput *s3.PutObjectInput
+
+type stubS3Service struct{}
 
 func (stub stubS3Service) PutObject(input *s3.PutObjectInput) (*s3.PutObjectOutput, error) {
 	lastPutObjectInput = input
 	var putObjectOutput *s3.PutObjectOutput
 	return putObjectOutput, nil
 }
-
 func reset() {
 	lastPutObjectInput = nil
 }
 
-func TestS3ClientUpload(t *testing.T) {
-	reset()
-	stub := stubS3Service{}
-	service := New(stub)
-	err := service.Upload("my-fake-bucket", []objects.File{
+// Sample data
+
+func sampleFiles() []objects.File {
+	return []objects.File{
 		objects.File{
 			Location:     "../fixtures/one-file/my-file.txt",
 			Key:          "my-file.txt",
@@ -33,7 +33,14 @@ func TestS3ClientUpload(t *testing.T) {
 			CacheControl: "",
 			ContentType:  "text/plain",
 		},
-	})
+	}
+}
+
+func TestS3ClientUpload(t *testing.T) {
+	reset()
+	stub := stubS3Service{}
+	service := New(stub)
+	err := service.Upload("my-fake-bucket", sampleFiles())
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
