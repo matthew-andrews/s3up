@@ -5,7 +5,6 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type File struct {
@@ -44,8 +43,4 @@ func GetFiles(files []string, strip int, destination string, cacheControl string
 		}
 	}
 	return output, nil
-}
-
-func StripFromName(name string, strip int) string {
-	return strings.Join(strings.Split(name, "/")[strip:], "/")
 }

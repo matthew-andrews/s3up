@@ -62,20 +62,6 @@ func TestGetFilesWithAFolderWithSubfolders(t *testing.T) {
 
 }
 
-func TestStripFromName(t *testing.T) {
-	stripMap := map[int]string{
-		0: "../fixtures/one-file/my-file.txt",
-		1: "fixtures/one-file/my-file.txt",
-		2: "one-file/my-file.txt",
-		3: "my-file.txt",
-	}
-	for strip, expected := range stripMap {
-		if actual := StripFromName("../fixtures/one-file/my-file.txt", strip); actual != expected {
-			t.Fatalf("expected %s to equal %s", actual, expected)
-		}
-	}
-}
-
 func fileSlicesAreEquivalent(expected []File, actual []File) error {
 	if len(expected) != len(actual) {
 		return errors.New(fmt.Sprintf("returned slice should be length %d", len(expected)))
