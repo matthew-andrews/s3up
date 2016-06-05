@@ -8,13 +8,15 @@ import (
 )
 
 type File struct {
-	Location    string
-	Key         string
-	Etag        string
-	ContentType string
+	Location     string
+	Key          string
+	Etag         string
+	ACL          string
+	CacheControl string
+	ContentType  string
 }
 
-func GetFiles(directory string, strip int, destination string) ([]File, error) {
+func GetFiles(directory string, strip int, destination string, cacheControl string, acl string) ([]File, error) {
 	directory = filepath.Clean(directory)
 	var output []File
 	files, err := ioutil.ReadDir(directory)
@@ -24,17 +26,19 @@ func GetFiles(directory string, strip int, destination string) ([]File, error) {
 	for _, file := range files {
 		name := filepath.Join(directory, file.Name())
 		if file.IsDir() {
-			subFiles, err := GetFiles(name, strip, destination)
+			subFiles, err := GetFiles(name, strip, destination, cacheControl, acl)
 			if err != nil {
 				return output, err
 			}
 			output = append(output, subFiles...)
 		} else {
 			output = append(output, File{
-				Key:         filepath.Join(destination, StripFromName(name, strip)),
-				Location:    name,
-				Etag:        "TODO",
-				ContentType: mime.TypeByExtension(filepath.Ext(name)),
+				ACL:          acl,
+				CacheControl: cacheControl,
+				ContentType:  mime.TypeByExtension(filepath.Ext(name)),
+				Etag:         "TODO",
+				Key:          filepath.Join(destination, StripFromName(name, strip)),
+				Location:     name,
 			})
 		}
 	}

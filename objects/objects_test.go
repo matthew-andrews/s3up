@@ -7,17 +7,19 @@ import (
 )
 
 func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
-	files, err := GetFiles("../fixtures/one-file", 3, "prefix")
+	files, err := GetFiles("../fixtures/one-file", 3, "prefix", "", "public-read")
 	if err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}
 
 	if err = fileSlicesAreEquivalent(files, []File{
 		File{
-			Key:         "prefix/my-file.txt",
-			Location:    "../fixtures/one-file/my-file.txt",
-			ContentType: "text/plain; charset=utf-8",
-			Etag:        "TODO",
+			ACL:          "public-read",
+			CacheControl: "",
+			ContentType:  "text/plain; charset=utf-8",
+			Etag:         "TODO",
+			Key:          "prefix/my-file.txt",
+			Location:     "../fixtures/one-file/my-file.txt",
 		},
 	}); err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
@@ -25,23 +27,27 @@ func TestGetFilesWithAFolderWithASingleFile(t *testing.T) {
 }
 
 func TestGetFilesWithAFolderWithSubfolders(t *testing.T) {
-	files, err := GetFiles("../fixtures/subfolders", 3, "")
+	files, err := GetFiles("../fixtures/subfolders", 3, "", "", "public-read")
 	if err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
 	}
 
 	if err = fileSlicesAreEquivalent(files, []File{
 		File{
-			Key:         "subsubfolder/bottom-file.txt",
-			Location:    "../fixtures/subfolders/subsubfolder/bottom-file.txt",
-			ContentType: "text/plain; charset=utf-8",
-			Etag:        "TODO",
+			ACL:          "public-read",
+			CacheControl: "",
+			ContentType:  "text/plain; charset=utf-8",
+			Etag:         "TODO",
+			Key:          "subsubfolder/bottom-file.txt",
+			Location:     "../fixtures/subfolders/subsubfolder/bottom-file.txt",
 		},
 		File{
-			Key:         "top-file.txt",
-			Location:    "../fixtures/subfolders/top-file.txt",
-			ContentType: "text/plain; charset=utf-8",
-			Etag:        "TODO",
+			ACL:          "public-read",
+			CacheControl: "",
+			ContentType:  "text/plain; charset=utf-8",
+			Etag:         "TODO",
+			Key:          "top-file.txt",
+			Location:     "../fixtures/subfolders/top-file.txt",
 		},
 	}); err != nil {
 		t.Fatalf("Unexpected error, %v\n", err)
