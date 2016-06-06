@@ -11,6 +11,7 @@ import (
 
 var lastPutObjectInput *s3.PutObjectInput
 var lastHeadObjectInput *s3.HeadObjectInput
+var lastCopyObjectInput *s3.CopyObjectInput
 
 type stubS3Service struct{}
 
@@ -18,6 +19,11 @@ func (stub stubS3Service) PutObject(input *s3.PutObjectInput) (*s3.PutObjectOutp
 	lastPutObjectInput = input
 	var putObjectOutput *s3.PutObjectOutput
 	return putObjectOutput, nil
+}
+func (stub stubS3Service) CopyObject(input *s3.CopyObjectInput) (*s3.CopyObjectOutput, error) {
+	lastCopyObjectInput = input
+	var copyObjectOutput *s3.CopyObjectOutput
+	return copyObjectOutput, nil
 }
 func (stub stubS3Service) HeadObject(input *s3.HeadObjectInput) (*s3.HeadObjectOutput, error) {
 	lastHeadObjectInput = input
@@ -121,10 +127,13 @@ func TestUpdatesMetadataIfThatIsAllThatHasChanged(t *testing.T) {
 	if lastHeadObjectInput == nil {
 		t.Fatalf("S3Client should make a HeadObject request to the S3 object before deciding to upload")
 	}
-	if aws.StringValue(lastPutObjectInput.ContentType) != "text/plain" {
+	if aws.StringValue(lastCopyObjectInput.ContentType) != "text/plain" {
 		t.Fatalf("S3Client should have PutObject request to the S3 object to update the metadata if it has changed")
 	}
-	if lastPutObjectInput.Body != nil {
+	if lastPutObjectInput != nil {
 		t.Fatalf("S3Client should make not have made a PutObject request with a Body to the S3 object if the file hasn't changed")
+	}
+	if lastCopyObjectInput == nil {
+		t.Fatalf("S3Client should not have made a CopyObject request if only the file's metadata has changed")
 	}
 }
