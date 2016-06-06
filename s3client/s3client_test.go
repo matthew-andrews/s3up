@@ -53,19 +53,17 @@ func reset() {
 
 // Sample data
 
-func TestS3ClientUpload(t *testing.T) {
+func TestS3ClientUploadFile(t *testing.T) {
 	reset()
 	stub := stubS3Service{}
 	service := New(stub)
-	err := service.Upload("my-fake-bucket", []objects.File{
-		objects.File{
-			Location:     "../fixtures/one-file/my-file.txt",
-			Key:          "my-new-file.txt",
-			ETag:         "f0ef7081e1539ac00ef5b761b4fb01b3",
-			ACL:          "public-read",
-			CacheControl: "",
-			ContentType:  "text/plain",
-		},
+	err := service.UploadFile("my-fake-bucket", objects.File{
+		Location:     "../fixtures/one-file/my-file.txt",
+		Key:          "my-new-file.txt",
+		ETag:         "f0ef7081e1539ac00ef5b761b4fb01b3",
+		ACL:          "public-read",
+		CacheControl: "",
+		ContentType:  "text/plain",
 	})
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
@@ -84,15 +82,13 @@ func TestHeadsBeforePuts(t *testing.T) {
 	reset()
 	stub := stubS3Service{}
 	service := New(stub)
-	err := service.Upload("my-fake-bucket", []objects.File{
-		objects.File{
-			Location:     "../fixtures/one-file/my-file.txt",
-			Key:          "my-file.txt",
-			ETag:         "f0ef7081e1539ac00ef5b761b4fb01b3",
-			ACL:          "public-read",
-			CacheControl: "",
-			ContentType:  "text/plain",
-		},
+	err := service.UploadFile("my-fake-bucket", objects.File{
+		Location:     "../fixtures/one-file/my-file.txt",
+		Key:          "my-file.txt",
+		ETag:         "f0ef7081e1539ac00ef5b761b4fb01b3",
+		ACL:          "public-read",
+		CacheControl: "",
+		ContentType:  "text/plain",
 	})
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
@@ -110,15 +106,13 @@ func TestUpdatesMetadataIfThatIsAllThatHasChanged(t *testing.T) {
 	reset()
 	stub := stubS3Service{}
 	service := New(stub)
-	err := service.Upload("my-fake-bucket", []objects.File{
-		objects.File{
-			Location:     "../fixtures/one-file/my-file.txt",
-			Key:          "my-file-with-different-metadata.txt",
-			ETag:         "f0ef7081e1539ac00ef5b761b4fb01b3",
-			ACL:          "public-read",
-			CacheControl: "",
-			ContentType:  "text/plain",
-		},
+	err := service.UploadFile("my-fake-bucket", objects.File{
+		Location:     "../fixtures/one-file/my-file.txt",
+		Key:          "my-file-with-different-metadata.txt",
+		ETag:         "f0ef7081e1539ac00ef5b761b4fb01b3",
+		ACL:          "public-read",
+		CacheControl: "",
+		ContentType:  "text/plain",
 	})
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
