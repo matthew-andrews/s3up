@@ -25,21 +25,7 @@ func New(service s3Interface) client {
 	}
 }
 
-func (client client) Upload(bucket string, files []objects.File) error {
-	if len(files) < 1 {
-		return errors.New("No files found for upload to S3.  (Directories are ignored)")
-	}
-
-	for _, file := range files {
-		if err := client.uploadFile(bucket, file); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (client client) uploadFile(bucket string, file objects.File) error {
+func (client client) UploadFile(bucket string, file objects.File) error {
 	// HeadObject
 	headResp, err := client.Service.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(bucket),
