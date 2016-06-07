@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/matthew-andrews/s3up/etag"
 	"github.com/matthew-andrews/s3up/objects"
 	"os"
 )
@@ -36,7 +37,13 @@ func (client client) UploadFile(bucket string, file objects.File) error {
 		return errors.New(fmt.Sprintf("Head request to S3 object failed: %s", err))
 	}
 
-	if aws.StringValue(headResp.ETag) != "\""+file.ETag+"\"" {
+	// Calculate ETag
+	fileETag, err := etag.Compute(file.Location)
+	if err != nil {
+		return err
+	}
+
+	if aws.StringValue(headResp.ETag) != "\""+fileETag+"\"" {
 		// PutObject if ETags mismatch
 		realFile, err := os.Open(file.Location)
 		if err != nil {
