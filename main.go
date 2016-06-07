@@ -16,29 +16,29 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.IntFlag{
 			Name:  "strip",
-			Usage: "Optionally remove the specified number of leading path elements",
+			Usage: "optionally remove the specified number of leading path elements",
 		},
 		cli.IntFlag{
 			Name:  "concurrency",
-			Usage: "Optionally configure the maximum number of simultaneous uploads",
+			Usage: "optionally configure the maximum number of simultaneous uploads",
 			Value: 10,
 		},
 		cli.StringFlag{
 			Name:  "destination",
-			Usage: "Optionally add a prefix to the upload path",
+			Usage: "optionally add a prefix to the upload path",
 		},
 		cli.StringFlag{
 			Name:  "bucket",
-			Usage: "Specify the S3 bucket to upload files to",
+			Usage: "specify the S3 bucket to upload files to",
 		},
 		cli.StringFlag{
 			Name:  "cache-control",
-			Usage: "Optionally set a Cache-Control value",
+			Usage: "optionally set a Cache-Control value",
 		},
 		cli.StringFlag{
 			Name:  "acl",
 			Value: "public-read",
-			Usage: "Optionally set the Canned Access Control List for new files being put into S3 (default to public-read)",
+			Usage: "optionally set the Canned Access Control List for new files being put into S3 (default to public-read)",
 		},
 	}
 	app.Action = func(c *cli.Context) error {
