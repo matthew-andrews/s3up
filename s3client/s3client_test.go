@@ -1,7 +1,9 @@
 package s3client
 
 import (
+	"errors"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/matthew-andrews/s3up/objects"
 	"testing"
@@ -42,6 +44,10 @@ func (stub stubS3Service) HeadObject(input *s3.HeadObjectInput) (*s3.HeadObjectO
 			ContentType:  aws.String("text/html"),
 			ETag:         aws.String("\"f0ef7081e1539ac00ef5b761b4fb01b3\""),
 		}, nil
+	}
+
+	if aws.StringValue(input.Key) == "my-new-file.txt" {
+		return &s3.HeadObjectOutput{}, awserr.New("", "status code: 404, request id: AAAAAAAAAAAAAAAA", errors.New("status code: 404, request id: AAAAAAAAAAAAAAAA"))
 	}
 
 	return &s3.HeadObjectOutput{}, nil

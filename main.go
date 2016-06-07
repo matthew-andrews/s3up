@@ -18,6 +18,11 @@ func main() {
 			Name:  "strip",
 			Usage: "Optionally remove the specified number of leading path elements",
 		},
+		cli.IntFlag{
+			Name:  "concurrency",
+			Usage: "Optionally configure the maximum number of simultaneous uploads",
+			Value: 10,
+		},
 		cli.StringFlag{
 			Name:  "destination",
 			Usage: "Optionally add a prefix to the upload path",
@@ -38,7 +43,7 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) error {
 		files, _ := objects.GetFiles(c.Args(), c.Int("strip"), c.String("destination"), c.String("cache-control"), c.String("acl"))
-		err := uploader.Upload(c.String("bucket"), files)
+		err := uploader.Upload(c.String("bucket"), files, c.Int("concurrency"))
 		if err != nil {
 			return cli.NewExitError(fmt.Sprintf("%s", err), 1)
 		}
