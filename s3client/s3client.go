@@ -8,6 +8,7 @@ import (
 	"github.com/matthew-andrews/s3up/etag"
 	"github.com/matthew-andrews/s3up/objects"
 	"os"
+	"strings"
 )
 
 type s3Interface interface {
@@ -33,7 +34,7 @@ func (client client) UploadFile(bucket string, file objects.File) error {
 		Key:    aws.String(file.Key),
 	})
 
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "status code: 404") {
 		return errors.New(fmt.Sprintf("Head request to S3 object failed: %s", err))
 	}
 
