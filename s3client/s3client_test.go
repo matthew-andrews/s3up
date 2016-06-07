@@ -60,7 +60,6 @@ func TestS3ClientUploadFile(t *testing.T) {
 	err := service.UploadFile("my-fake-bucket", objects.File{
 		Location:     "../fixtures/one-file/my-file.txt",
 		Key:          "my-new-file.txt",
-		ETag:         "f0ef7081e1539ac00ef5b761b4fb01b3",
 		ACL:          "public-read",
 		CacheControl: "",
 		ContentType:  "text/plain",
@@ -85,7 +84,6 @@ func TestHeadsBeforePuts(t *testing.T) {
 	err := service.UploadFile("my-fake-bucket", objects.File{
 		Location:     "../fixtures/one-file/my-file.txt",
 		Key:          "my-file.txt",
-		ETag:         "f0ef7081e1539ac00ef5b761b4fb01b3",
 		ACL:          "public-read",
 		CacheControl: "",
 		ContentType:  "text/plain",
@@ -109,7 +107,6 @@ func TestUpdatesMetadataIfThatIsAllThatHasChanged(t *testing.T) {
 	err := service.UploadFile("my-fake-bucket", objects.File{
 		Location:     "../fixtures/one-file/my-file.txt",
 		Key:          "my-file-with-different-metadata.txt",
-		ETag:         "f0ef7081e1539ac00ef5b761b4fb01b3",
 		ACL:          "public-read",
 		CacheControl: "",
 		ContentType:  "text/plain",
