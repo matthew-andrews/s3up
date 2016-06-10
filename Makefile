@@ -1,3 +1,6 @@
+clean:
+	git clean -fxd
+
 help:
 	go run main.go --help
 
