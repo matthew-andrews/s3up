@@ -63,7 +63,7 @@ func (client client) UploadFile(bucket string, file objects.File) error {
 
 		_, err = client.Service.PutObject(putObjectInput)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Failed to update file: %s", err.Error()))
+			return errors.New(fmt.Sprintf("Failed to update file: %s, error: %s", file, err.Error()))
 		}
 		fmt.Printf("Successfully uploaded: %s\n", file.Key)
 
