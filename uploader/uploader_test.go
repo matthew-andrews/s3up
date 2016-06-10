@@ -1,6 +1,7 @@
 package uploader
 
 import (
+	"errors"
 	"github.com/matthew-andrews/s3up/objects"
 	"strings"
 	"testing"
@@ -9,7 +10,10 @@ import (
 
 type stubS3Client struct{}
 
-func (stub stubS3Client) UploadFile(string, objects.File) error {
+func (stub stubS3Client) UploadFile(bucket string, object objects.File) error {
+	if object.Key == "error" {
+		return errors.New("synthetic error")
+	}
 	time.Sleep(50 * time.Millisecond)
 	return nil
 }
@@ -35,9 +39,20 @@ func TestThreeAtATime(t *testing.T) {
 	}
 }
 
+func TestErrorsAreEscalated(t *testing.T) {
+	errors := Upload(stubS3Client{}, "", []objects.File{
+		objects.File{Key: "error"},
+		objects.File{},
+		objects.File{Key: "error"},
+	}, 2)
+	if len(errors) != 2 {
+		t.Fatal("Uploader should have returned 2 errors")
+	}
+}
+
 func TestNoFiles(t *testing.T) {
-	err := Upload(stubS3Client{}, "", make([]objects.File, 0), 1)
-	if strings.Contains(err.Error(), "No files found") == false {
+	errs := Upload(stubS3Client{}, "", make([]objects.File, 0), 1)
+	if strings.Contains(errs[0].Error(), "No files found") == false {
 		t.Fatal("The error that was expected was not thrown")
 	}
 }
