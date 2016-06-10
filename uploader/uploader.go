@@ -3,21 +3,21 @@ package uploader
 import (
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/matthew-andrews/s3up/objects"
-	"github.com/matthew-andrews/s3up/s3client"
 	"sync"
 )
 
-func Upload(bucket string, files []objects.File, concurrency int) error {
+type s3ClientInterface interface {
+	UploadFile(string, objects.File) error
+}
+
+func Upload(service s3ClientInterface, bucket string, files []objects.File, concurrency int) error {
 	if len(files) < 1 {
 		return errors.New("No files found for upload to S3.  (Directories are ignored)")
 	}
 
 	var sem = make(chan bool, concurrency)
 	var wg sync.WaitGroup
-	service := s3client.New(s3.New(session.New()))
 
 	for _, file := range files {
 		wg.Add(1)
