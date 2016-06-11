@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/matthew-andrews/s3up/etag"
 	"github.com/matthew-andrews/s3up/objects"
 	"os"
@@ -12,18 +13,23 @@ import (
 )
 
 type s3Interface interface {
-	PutObject(*s3.PutObjectInput) (*s3.PutObjectOutput, error)
 	HeadObject(*s3.HeadObjectInput) (*s3.HeadObjectOutput, error)
 	CopyObject(*s3.CopyObjectInput) (*s3.CopyObjectOutput, error)
 }
 
-type client struct {
-	Service s3Interface
+type s3UploaderInterface interface {
+	Upload(*s3manager.UploadInput, ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
 }
 
-func New(service s3Interface) client {
+type client struct {
+	Service  s3Interface
+	Uploader s3UploaderInterface
+}
+
+func New(service s3Interface, uploader s3UploaderInterface) client {
 	return client{
-		Service: service,
+		Service:  service,
+		Uploader: uploader,
 	}
 }
 
@@ -45,14 +51,14 @@ func (client client) UploadFile(bucket string, file objects.File) error {
 	}
 
 	if aws.StringValue(headResp.ETag) != "\""+fileETag+"\"" {
-		// PutObject if ETags mismatch
+		// Upload if ETags mismatch
 		realFile, err := os.Open(file.Location)
+		defer realFile.Close()
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not open file: %s", file.Location))
 		}
-		defer realFile.Close()
 
-		putObjectInput := &s3.PutObjectInput{
+		uploadInput := &s3manager.UploadInput{
 			Body:         realFile,
 			Bucket:       aws.String(bucket),
 			Key:          aws.String(file.Key),
@@ -61,7 +67,7 @@ func (client client) UploadFile(bucket string, file objects.File) error {
 			ACL:          aws.String(file.ACL),
 		}
 
-		_, err = client.Service.PutObject(putObjectInput)
+		_, err = client.Uploader.Upload(uploadInput)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Failed to update file: %s, error: %s", file, err.Error()))
 		}
