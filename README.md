@@ -4,6 +4,12 @@
 
 Grab a binary from:- https://github.com/matthew-andrews/s3up/releases and put it on your `PATH`.
 
+For example, on OS X you can do this via:-
+
+```sh
+curl -sfL https://github.com/matthew-andrews/s3up/releases/download/v1.0.4/s3up_darwin_386 -o /usr/local/bin/s3up && chmod +x /usr/local/bin/s3up
+```
+
 ## Usage
 
 ```
@@ -51,3 +57,7 @@ This will be uploaded to:-
 ```
 https://s3-eu-west-1.amazonaws.com/s3up-test/hello/sub-folder/hello-world.txt
 ```
+
+## IAM permissions
+
+s3up integrates with all the usual ways of configuring AWS permissions (`.aws/credentials` in your home directory, `AWS_ACCESS_KEY_ID` / `AWS_SECRET_KEY_ID` environment variables, etc).  The user or role that s3up is authenticating with will also need permissions to read and write files and metadata about files in the buckets it is intended to be used with.
