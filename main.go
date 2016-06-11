@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/matthew-andrews/s3up/objects"
 	"github.com/matthew-andrews/s3up/s3client"
 	"github.com/matthew-andrews/s3up/uploader"
@@ -46,7 +47,8 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) error {
 		files, _ := objects.GetFiles(c.Args(), c.Int("strip"), c.String("destination"), c.String("cache-control"), c.String("acl"))
-		service := s3client.New(s3.New(session.New()))
+		awsSession := session.New()
+		service := s3client.New(s3.New(awsSession), s3manager.NewUploader(awsSession))
 		err := uploader.Upload(service, c.String("bucket"), files, c.Int("concurrency"))
 		if err != nil {
 			return cli.NewExitError(fmt.Sprintf("%s", err), 1)
