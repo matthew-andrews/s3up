@@ -10,6 +10,12 @@ For example, on OS X you can do this via:-
 curl -sfL https://github.com/matthew-andrews/s3up/releases/download/v1.0.4/s3up_darwin_386 -o /usr/local/bin/s3up && chmod +x /usr/local/bin/s3up
 ```
 
+Or on Ubuntu (or in CI environments such as Circle CI) you can do this via:-
+
+```sh
+curl -sfL https://github.com/matthew-andrews/s3up/releases/download/v1.0.4/s3up_linux_386 -o /home/ubuntu/bin/s3up && chmod +x /home/ubuntu/bin/s3up
+```
+
 ## Usage
 
 ```
