@@ -57,49 +57,47 @@ func (stub stubS3Service) HeadObject(input *s3.HeadObjectInput) (*s3.HeadObjectO
 
 	return &s3.HeadObjectOutput{}, nil
 }
-func testUpload(file objects.File) error {
+
+func helperUpload(file objects.File, dryRun bool) error {
 	lastUploadInput = nil
 	lastHeadObjectInput = nil
 	lastCopyObjectInput = nil
-	service := New(stubS3Service{}, stubS3Uploader{})
+	service := New(stubS3Service{}, stubS3Uploader{}, dryRun)
 	return service.UploadFile("my-fake-bucket", file)
+}
+
+func helperFile(file string) objects.File {
+	return objects.File{
+		Location:     "../fixtures/one-file/my-file.txt",
+		Key:          file,
+		ACL:          "public-read",
+		CacheControl: "",
+		ContentType:  "text/plain",
+	}
 }
 
 // Sample data
 
 func TestS3ClientUploadFile(t *testing.T) {
-	err := testUpload(objects.File{
-		Location:     "../fixtures/one-file/my-file.txt",
-		Key:          "my-new-file.txt",
-		ACL:          "public-read",
-		CacheControl: "",
-		ContentType:  "text/plain",
-	})
+	err := helperUpload(helperFile("my-new-file.txt"), false)
+
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
-
 	if aws.StringValue(lastUploadInput.Bucket) != "my-fake-bucket" {
 		t.Fatalf("Attempted to upload to the wrong bucket: %s", aws.StringValue(lastUploadInput.Bucket))
 	}
-
 	if aws.StringValue(lastUploadInput.Key) != "my-new-file.txt" {
 		t.Fatalf("Attempted to upload to the wrong key: %s", aws.StringValue(lastUploadInput.Key))
 	}
 }
 
 func TestHeadsBeforePuts(t *testing.T) {
-	err := testUpload(objects.File{
-		Location:     "../fixtures/one-file/my-file.txt",
-		Key:          "my-file.txt",
-		ACL:          "public-read",
-		CacheControl: "",
-		ContentType:  "text/plain",
-	})
+	err := helperUpload(helperFile("my-file.txt"), false)
+
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
-
 	if lastHeadObjectInput == nil {
 		t.Fatalf("S3Client should make a HeadObject request to the S3 object before deciding to upload")
 	}
@@ -109,17 +107,11 @@ func TestHeadsBeforePuts(t *testing.T) {
 }
 
 func TestUpdatesMetadataIfThatIsAllThatHasChanged(t *testing.T) {
-	err := testUpload(objects.File{
-		Location:     "../fixtures/one-file/my-file.txt",
-		Key:          "my-file-with-different-metadata.txt",
-		ACL:          "public-read",
-		CacheControl: "",
-		ContentType:  "text/plain",
-	})
+	err := helperUpload(helperFile("my-file-with-different-metadata.txt"), false)
+
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
-
 	if lastHeadObjectInput == nil {
 		t.Fatalf("S3Client should make a HeadObject request to the S3 object before deciding to upload")
 	}
@@ -131,5 +123,39 @@ func TestUpdatesMetadataIfThatIsAllThatHasChanged(t *testing.T) {
 	}
 	if lastCopyObjectInput == nil {
 		t.Fatalf("S3Client should not have made a CopyObject request if only the file's metadata has changed")
+	}
+}
+
+func TestDryRunDoesntUpload(t *testing.T) {
+	err := helperUpload(helperFile("my-new-file.txt"), true)
+
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	if lastHeadObjectInput == nil {
+		t.Fatalf("Dry run upload should head object")
+	}
+	if lastUploadInput != nil {
+		t.Fatalf("Dry run upload should not Upload")
+	}
+	if lastCopyObjectInput != nil {
+		t.Fatalf("Dry run upload should not CopyObject")
+	}
+}
+
+func TestDryRunDoesntCopyObject(t *testing.T) {
+	err := helperUpload(helperFile("my-file-with-different-metadata.txt"), true)
+
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	if lastHeadObjectInput == nil {
+		t.Fatalf("Dry run upload should head object")
+	}
+	if lastUploadInput != nil {
+		t.Fatalf("Dry run upload should not Upload")
+	}
+	if lastCopyObjectInput != nil {
+		t.Fatalf("Dry run upload should not CopyObject")
 	}
 }

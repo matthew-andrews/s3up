@@ -24,12 +24,14 @@ type s3UploaderInterface interface {
 type client struct {
 	Service  s3Interface
 	Uploader s3UploaderInterface
+	DryRun   bool
 }
 
-func New(service s3Interface, uploader s3UploaderInterface) client {
+func New(service s3Interface, uploader s3UploaderInterface, dryRun bool) client {
 	return client{
 		Service:  service,
 		Uploader: uploader,
+		DryRun:   dryRun,
 	}
 }
 
@@ -58,38 +60,47 @@ func (client client) UploadFile(bucket string, file objects.File) error {
 			return errors.New(fmt.Sprintf("Could not open file: %s", file.Location))
 		}
 
-		uploadInput := &s3manager.UploadInput{
-			Body:         realFile,
-			Bucket:       aws.String(bucket),
-			Key:          aws.String(file.Key),
-			ContentType:  aws.String(file.ContentType),
-			CacheControl: aws.String(file.CacheControl),
-			ACL:          aws.String(file.ACL),
-		}
+		if client.DryRun {
+			fmt.Printf("(dry-run) Successfully uploaded: %s\n", file.Key)
+		} else {
+			uploadInput := &s3manager.UploadInput{
+				Body:         realFile,
+				Bucket:       aws.String(bucket),
+				Key:          aws.String(file.Key),
+				ContentType:  aws.String(file.ContentType),
+				CacheControl: aws.String(file.CacheControl),
+				ACL:          aws.String(file.ACL),
+			}
 
-		_, err = client.Uploader.Upload(uploadInput)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Failed to update file: %s, error: %s", file, err.Error()))
+			_, err = client.Uploader.Upload(uploadInput)
+			if err != nil {
+				return errors.New(fmt.Sprintf("Failed to update file: %s, error: %s", file, err.Error()))
+			}
+			fmt.Printf("Successfully uploaded: %s\n", file.Key)
 		}
-		fmt.Printf("Successfully uploaded: %s\n", file.Key)
 
 	} else if aws.StringValue(headResp.CacheControl) != file.CacheControl || aws.StringValue(headResp.ContentType) != file.ContentType {
-		// CopyObject if ETags match but something else doesn't
-		copyObjectInput := &s3.CopyObjectInput{
-			Bucket:            aws.String(bucket),
-			CopySource:        aws.String(bucket + "/" + file.Key),
-			Key:               aws.String(file.Key),
-			ContentType:       aws.String(file.ContentType),
-			CacheControl:      aws.String(file.CacheControl),
-			ACL:               aws.String(file.ACL),
-			MetadataDirective: aws.String("REPLACE"),
-		}
+		if client.DryRun {
+			fmt.Printf("(dry-run) Successfully updated just metadata of: %s\n", file.Key)
+		} else {
 
-		_, err = client.Service.CopyObject(copyObjectInput)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Failed to update file: %s, error: %s", file, err.Error()))
+			// CopyObject if ETags match but something else doesn't
+			copyObjectInput := &s3.CopyObjectInput{
+				Bucket:            aws.String(bucket),
+				CopySource:        aws.String(bucket + "/" + file.Key),
+				Key:               aws.String(file.Key),
+				ContentType:       aws.String(file.ContentType),
+				CacheControl:      aws.String(file.CacheControl),
+				ACL:               aws.String(file.ACL),
+				MetadataDirective: aws.String("REPLACE"),
+			}
+
+			_, err = client.Service.CopyObject(copyObjectInput)
+			if err != nil {
+				return errors.New(fmt.Sprintf("Failed to update file: %s, error: %s", file, err.Error()))
+			}
+			fmt.Printf("Successfully updated just metadata of: %s\n", file.Key)
 		}
-		fmt.Printf("Successfully updated just metadata of: %s\n", file.Key)
 	} else {
 		fmt.Printf("Unchanged, skipping: %s\n", file.Key)
 	}

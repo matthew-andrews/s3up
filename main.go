@@ -44,11 +44,15 @@ func main() {
 			Value: "public-read",
 			Usage: "optionally set the Canned Access Control List for new files being put into S3 (default to public-read)",
 		},
+		cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "perform a trial run with no changes made",
+		},
 	}
 	app.Action = func(c *cli.Context) error {
 		files, _ := objects.GetFiles(c.Args(), c.Int("strip"), c.String("destination"), c.String("cache-control"), c.String("acl"))
 		awsSession := session.New()
-		service := s3client.New(s3.New(awsSession), s3manager.NewUploader(awsSession))
+		service := s3client.New(s3.New(awsSession), s3manager.NewUploader(awsSession), c.Bool("dry-run"))
 		err := uploader.Upload(service, c.String("bucket"), files, c.Int("concurrency"))
 		if err != nil {
 			return cli.NewExitError(fmt.Sprintf("%s", err), 1)
