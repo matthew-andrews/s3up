@@ -56,7 +56,7 @@ export AWS_REGION="eu-west-1"; \
 So, if there were a file called:-
 
 ```
-./public/sub-folder/hello-world.txt`
+./public/sub-folder/hello-world.txt
 ```
 
 This will be uploaded to:-
