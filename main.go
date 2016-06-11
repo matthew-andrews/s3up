@@ -16,7 +16,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "S3 Upload"
 	app.Usage = "Uploads files to S3"
-	app.Version = "v1.0.4"
+	app.Version = "v1.0.5"
 	app.Flags = []cli.Flag{
 		cli.IntFlag{
 			Name:  "strip",
