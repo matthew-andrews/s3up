@@ -36,6 +36,7 @@ GLOBAL OPTIONS:
    --bucket value         specify the S3 bucket to upload files to
    --cache-control value  optionally set a Cache-Control value
    --acl value            optionally set the Canned Access Control List for new files being put into S3 (default to public-read) (default: "public-read")
+   --dry-run              perform a trial run with no changes made
    --help, -h             show help
    --version, -v          print the version
 ``` 
