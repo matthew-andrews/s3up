@@ -36,7 +36,18 @@ The following command will recursively find all the files in the `public` subfol
 export AWS_REGION="eu-west-1"; \
 	export AWS_ACCESS_KEY_ID="???"; \
 	export AWS_SECRET_ACCESS_KEY="???"; \
-	s3up --destination hello --bucket s3up-test --cache-control "public, max-age=31536000" --strip 1 `find . -path "./public/*"`
+	s3up --destination hello --bucket s3up-test --cache-control "public, max-age=31536000" --strip 1 \
+	`find . -path "./public/*"`
 ```
 
-So, if there were a file called `./public/sub-folder/hello-world.txt` this will be uploaded to `https://s3-eu-west-1.amazonaws.com/s3up-test/hello/sub-folder/hello-world.txt`.
+So, if there were a file called:-
+
+```
+./public/sub-folder/hello-world.txt`
+```
+
+This will be uploaded to:-
+
+```
+https://s3-eu-west-1.amazonaws.com/s3up-test/hello/sub-folder/hello-world.txt
+```
