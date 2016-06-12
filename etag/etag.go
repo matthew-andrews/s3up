@@ -13,7 +13,7 @@ func Compute(filePath string) (string, error) {
 	var result []byte
 	file, err := os.Open(filePath)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	defer file.Close()
 
