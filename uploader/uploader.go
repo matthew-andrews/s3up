@@ -11,12 +11,12 @@ type s3ClientInterface interface {
 }
 
 func Upload(service s3ClientInterface, bucket string, files []objects.File, concurrency int) []error {
-	ec := make(chan error, len(files))
 	if len(files) < 1 {
 		return []error{errors.New("No files found for upload to S3.  (Directories are ignored)")}
 	}
 
-	var sem = make(chan bool, concurrency)
+	ec := make(chan error, len(files))
+	sem := make(chan bool, concurrency)
 	var wg sync.WaitGroup
 
 	for _, file := range files {
