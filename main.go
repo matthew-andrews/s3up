@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -51,11 +52,34 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) error {
 		files, _ := objects.GetFiles(c.Args(), c.Int("strip"), c.String("destination"), c.String("cache-control"), c.String("acl"))
+
 		awsSession := session.New()
-		service := s3client.New(s3.New(awsSession), s3manager.NewUploader(awsSession), c.Bool("dry-run"))
-		err := uploader.Upload(service, c.String("bucket"), files, c.Int("concurrency"))
+		var region string
+		if os.Getenv("AWS_REGION") == "" {
+			region = "us-east-1"
+		} else {
+			region = os.Getenv("AWS_REGION")
+		}
+		s3Service := s3.New(awsSession, &aws.Config{
+			S3ForcePathStyle: aws.Bool(true),
+			S3UseAccelerate:  aws.Bool(false),
+			LogLevel:         aws.LogLevel(aws.LogDebugWithHTTPBody),
+			Region:           aws.String(region),
+		})
+
+		resp, err := s3Service.GetBucketLocation(&s3.GetBucketLocationInput{
+			Bucket: aws.String(c.String("bucket")),
+		})
 		if err != nil {
 			return cli.NewExitError(fmt.Sprintf("%s", err), 1)
+		}
+		fmt.Println(resp)
+		return cli.NewExitError("lol k", 1)
+
+		service := s3client.New(s3Service, s3manager.NewUploader(awsSession), c.Bool("dry-run"))
+		errs := uploader.Upload(service, c.String("bucket"), files, c.Int("concurrency"))
+		if errs != nil {
+			return cli.NewExitError(fmt.Sprintf("%s", errs), 1)
 		}
 		return nil
 	}
